@@ -10,8 +10,20 @@
 -- tupleN :: a -> ... -> a -> TupleN a
 -- @
 --
--- and instances for 'Functor', 'Applicative' (zipping), 'Foldable' and
--- 'Traversable'.
+-- and instances for
+--
+--   * 'Functor' applies a given function to all elements of a tuple.
+--
+--   * 'Applicative' zips two tuples, applying /i/-th function of the first to
+--     /i/-th element of the second.
+--
+--   * 'Monad' where /i/-th element of @x >>= f@ is the result of applying @f@
+--     to the /i/-th element of @x@ and taking its /i/-th result. In other words,
+--     @join :: Tupple N (TuppleN a) -> TuppleN a@ returns the diagonal of the
+--     /NxN/ matrix.
+--
+--   * 'Foldable' and 'Traversable' folds\/traverses over the /N/ elements.
+--
 module Data.Tuple.Homogenous where
 
 import Control.Applicative
@@ -38,6 +50,13 @@ instance Applicative Tuple0 where
     {-# INLINE (*>) #-}
     _ <*  _ = tuple0
     {-# INLINE (<*) #-}
+instance Monad Tuple0 where
+    return = pure
+    {-# INLINE return #-}
+    _ >>= _ = tuple0
+    {-# INLINE (>>=) #-}
+    (>>)    = (*>)
+    {-# INLINE (>>) #-}
 instance Foldable Tuple0 where
     foldMap _ _ = mempty
     {-# INLINE foldMap #-}
@@ -67,6 +86,13 @@ instance Applicative Tuple1 where
     {-# INLINE (*>) #-}
     k <*  _ = k
     {-# INLINE (<*) #-}
+instance Monad Tuple1 where
+    return = pure
+    {-# INLINE return #-}
+    (Tuple1 k) >>= f = f k
+    {-# INLINE (>>=) #-}
+    (>>)    = (*>)
+    {-# INLINE (>>) #-}
 instance Foldable Tuple1 where
     foldMap f (Tuple1 x) = f x
     {-# INLINE foldMap #-}
@@ -93,6 +119,16 @@ instance Applicative Tuple2
           {-# INLINE (<*) #-}
           (*>) _ y = y
           {-# INLINE (*>) #-}
+instance Monad Tuple2
+    where return = pure
+          {-# INLINE return #-}
+          (>>=) (Tuple2 (x1, x2)) f = Tuple2 (case f x1 of
+                                                         Tuple2 (y, _) -> y,
+                                                     case f x2 of
+                                                         Tuple2 (_, y) -> y)
+          {-# INLINABLE (>>=) #-}
+          (>>) = (*>)
+          {-# INLINE (>>) #-}
 instance Foldable Tuple2
     where foldr f z (Tuple2 (x1, x2)) = f x1 (f x2 z)
           {-# INLINABLE foldr #-}
@@ -123,6 +159,18 @@ instance Applicative Tuple3
           {-# INLINE (<*) #-}
           (*>) _ y = y
           {-# INLINE (*>) #-}
+instance Monad Tuple3
+    where return = pure
+          {-# INLINE return #-}
+          (>>=) (Tuple3 (x1, x2, x3)) f = Tuple3 (case f x1 of
+                                                             Tuple3 (y, _, _) -> y,
+                                                         case f x2 of
+                                                             Tuple3 (_, y, _) -> y,
+                                                         case f x3 of
+                                                             Tuple3 (_, _, y) -> y)
+          {-# INLINABLE (>>=) #-}
+          (>>) = (*>)
+          {-# INLINE (>>) #-}
 instance Foldable Tuple3
     where foldr f z (Tuple3 (x1,
                                            x2,
@@ -163,6 +211,20 @@ instance Applicative Tuple4
           {-# INLINE (<*) #-}
           (*>) _ y = y
           {-# INLINE (*>) #-}
+instance Monad Tuple4
+    where return = pure
+          {-# INLINE return #-}
+          (>>=) (Tuple4 (x1, x2, x3, x4)) f = Tuple4 (case f x1 of
+                                                                 Tuple4 (y, _, _, _) -> y,
+                                                             case f x2 of
+                                                                 Tuple4 (_, y, _, _) -> y,
+                                                             case f x3 of
+                                                                 Tuple4 (_, _, y, _) -> y,
+                                                             case f x4 of
+                                                                 Tuple4 (_, _, _, y) -> y)
+          {-# INLINABLE (>>=) #-}
+          (>>) = (*>)
+          {-# INLINE (>>) #-}
 instance Foldable Tuple4
     where foldr f z (Tuple4 (x1,
                                            x2,
@@ -213,6 +275,22 @@ instance Applicative Tuple5
           {-# INLINE (<*) #-}
           (*>) _ y = y
           {-# INLINE (*>) #-}
+instance Monad Tuple5
+    where return = pure
+          {-# INLINE return #-}
+          (>>=) (Tuple5 (x1, x2, x3, x4, x5)) f = Tuple5 (case f x1 of
+                                                                     Tuple5 (y, _, _, _, _) -> y,
+                                                                 case f x2 of
+                                                                     Tuple5 (_, y, _, _, _) -> y,
+                                                                 case f x3 of
+                                                                     Tuple5 (_, _, y, _, _) -> y,
+                                                                 case f x4 of
+                                                                     Tuple5 (_, _, _, y, _) -> y,
+                                                                 case f x5 of
+                                                                     Tuple5 (_, _, _, _, y) -> y)
+          {-# INLINABLE (>>=) #-}
+          (>>) = (*>)
+          {-# INLINE (>>) #-}
 instance Foldable Tuple5
     where foldr f z (Tuple5 (x1,
                                            x2,
@@ -270,6 +348,29 @@ instance Applicative Tuple6
           {-# INLINE (<*) #-}
           (*>) _ y = y
           {-# INLINE (*>) #-}
+instance Monad Tuple6
+    where return = pure
+          {-# INLINE return #-}
+          (>>=) (Tuple6 (x1,
+                                x2,
+                                x3,
+                                x4,
+                                x5,
+                                x6)) f = Tuple6 (case f x1 of
+                                                     Tuple6 (y, _, _, _, _, _) -> y,
+                                                 case f x2 of
+                                                     Tuple6 (_, y, _, _, _, _) -> y,
+                                                 case f x3 of
+                                                     Tuple6 (_, _, y, _, _, _) -> y,
+                                                 case f x4 of
+                                                     Tuple6 (_, _, _, y, _, _) -> y,
+                                                 case f x5 of
+                                                     Tuple6 (_, _, _, _, y, _) -> y,
+                                                 case f x6 of
+                                                     Tuple6 (_, _, _, _, _, y) -> y)
+          {-# INLINABLE (>>=) #-}
+          (>>) = (*>)
+          {-# INLINE (>>) #-}
 instance Foldable Tuple6
     where foldr f z (Tuple6 (x1,
                                            x2,
@@ -340,6 +441,32 @@ instance Applicative Tuple7
           {-# INLINE (<*) #-}
           (*>) _ y = y
           {-# INLINE (*>) #-}
+instance Monad Tuple7
+    where return = pure
+          {-# INLINE return #-}
+          (>>=) (Tuple7 (x1,
+                                x2,
+                                x3,
+                                x4,
+                                x5,
+                                x6,
+                                x7)) f = Tuple7 (case f x1 of
+                                                     Tuple7 (y, _, _, _, _, _, _) -> y,
+                                                 case f x2 of
+                                                     Tuple7 (_, y, _, _, _, _, _) -> y,
+                                                 case f x3 of
+                                                     Tuple7 (_, _, y, _, _, _, _) -> y,
+                                                 case f x4 of
+                                                     Tuple7 (_, _, _, y, _, _, _) -> y,
+                                                 case f x5 of
+                                                     Tuple7 (_, _, _, _, y, _, _) -> y,
+                                                 case f x6 of
+                                                     Tuple7 (_, _, _, _, _, y, _) -> y,
+                                                 case f x7 of
+                                                     Tuple7 (_, _, _, _, _, _, y) -> y)
+          {-# INLINABLE (>>=) #-}
+          (>>) = (*>)
+          {-# INLINE (>>) #-}
 instance Foldable Tuple7
     where foldr f z (Tuple7 (x1,
                                            x2,
@@ -418,6 +545,35 @@ instance Applicative Tuple8
           {-# INLINE (<*) #-}
           (*>) _ y = y
           {-# INLINE (*>) #-}
+instance Monad Tuple8
+    where return = pure
+          {-# INLINE return #-}
+          (>>=) (Tuple8 (x1,
+                                x2,
+                                x3,
+                                x4,
+                                x5,
+                                x6,
+                                x7,
+                                x8)) f = Tuple8 (case f x1 of
+                                                     Tuple8 (y, _, _, _, _, _, _, _) -> y,
+                                                 case f x2 of
+                                                     Tuple8 (_, y, _, _, _, _, _, _) -> y,
+                                                 case f x3 of
+                                                     Tuple8 (_, _, y, _, _, _, _, _) -> y,
+                                                 case f x4 of
+                                                     Tuple8 (_, _, _, y, _, _, _, _) -> y,
+                                                 case f x5 of
+                                                     Tuple8 (_, _, _, _, y, _, _, _) -> y,
+                                                 case f x6 of
+                                                     Tuple8 (_, _, _, _, _, y, _, _) -> y,
+                                                 case f x7 of
+                                                     Tuple8 (_, _, _, _, _, _, y, _) -> y,
+                                                 case f x8 of
+                                                     Tuple8 (_, _, _, _, _, _, _, y) -> y)
+          {-# INLINABLE (>>=) #-}
+          (>>) = (*>)
+          {-# INLINE (>>) #-}
 instance Foldable Tuple8
     where foldr f z (Tuple8 (x1,
                                            x2,
@@ -520,6 +676,38 @@ instance Applicative Tuple9
           {-# INLINE (<*) #-}
           (*>) _ y = y
           {-# INLINE (*>) #-}
+instance Monad Tuple9
+    where return = pure
+          {-# INLINE return #-}
+          (>>=) (Tuple9 (x1,
+                                x2,
+                                x3,
+                                x4,
+                                x5,
+                                x6,
+                                x7,
+                                x8,
+                                x9)) f = Tuple9 (case f x1 of
+                                                     Tuple9 (y, _, _, _, _, _, _, _, _) -> y,
+                                                 case f x2 of
+                                                     Tuple9 (_, y, _, _, _, _, _, _, _) -> y,
+                                                 case f x3 of
+                                                     Tuple9 (_, _, y, _, _, _, _, _, _) -> y,
+                                                 case f x4 of
+                                                     Tuple9 (_, _, _, y, _, _, _, _, _) -> y,
+                                                 case f x5 of
+                                                     Tuple9 (_, _, _, _, y, _, _, _, _) -> y,
+                                                 case f x6 of
+                                                     Tuple9 (_, _, _, _, _, y, _, _, _) -> y,
+                                                 case f x7 of
+                                                     Tuple9 (_, _, _, _, _, _, y, _, _) -> y,
+                                                 case f x8 of
+                                                     Tuple9 (_, _, _, _, _, _, _, y, _) -> y,
+                                                 case f x9 of
+                                                     Tuple9 (_, _, _, _, _, _, _, _, y) -> y)
+          {-# INLINABLE (>>=) #-}
+          (>>) = (*>)
+          {-# INLINE (>>) #-}
 instance Foldable Tuple9
     where foldr f z (Tuple9 (x1,
                                            x2,
@@ -632,6 +820,41 @@ instance Applicative Tuple10
           {-# INLINE (<*) #-}
           (*>) _ y = y
           {-# INLINE (*>) #-}
+instance Monad Tuple10
+    where return = pure
+          {-# INLINE return #-}
+          (>>=) (Tuple10 (x1,
+                                 x2,
+                                 x3,
+                                 x4,
+                                 x5,
+                                 x6,
+                                 x7,
+                                 x8,
+                                 x9,
+                                 x10)) f = Tuple10 (case f x1 of
+                                                        Tuple10 (y, _, _, _, _, _, _, _, _, _) -> y,
+                                                    case f x2 of
+                                                        Tuple10 (_, y, _, _, _, _, _, _, _, _) -> y,
+                                                    case f x3 of
+                                                        Tuple10 (_, _, y, _, _, _, _, _, _, _) -> y,
+                                                    case f x4 of
+                                                        Tuple10 (_, _, _, y, _, _, _, _, _, _) -> y,
+                                                    case f x5 of
+                                                        Tuple10 (_, _, _, _, y, _, _, _, _, _) -> y,
+                                                    case f x6 of
+                                                        Tuple10 (_, _, _, _, _, y, _, _, _, _) -> y,
+                                                    case f x7 of
+                                                        Tuple10 (_, _, _, _, _, _, y, _, _, _) -> y,
+                                                    case f x8 of
+                                                        Tuple10 (_, _, _, _, _, _, _, y, _, _) -> y,
+                                                    case f x9 of
+                                                        Tuple10 (_, _, _, _, _, _, _, _, y, _) -> y,
+                                                    case f x10 of
+                                                        Tuple10 (_, _, _, _, _, _, _, _, _, y) -> y)
+          {-# INLINABLE (>>=) #-}
+          (>>) = (*>)
+          {-# INLINE (>>) #-}
 instance Foldable Tuple10
     where foldr f z (Tuple10 (x1,
                                             x2,
@@ -754,6 +977,154 @@ instance Applicative Tuple11
           {-# INLINE (<*) #-}
           (*>) _ y = y
           {-# INLINE (*>) #-}
+instance Monad Tuple11
+    where return = pure
+          {-# INLINE return #-}
+          (>>=) (Tuple11 (x1,
+                                 x2,
+                                 x3,
+                                 x4,
+                                 x5,
+                                 x6,
+                                 x7,
+                                 x8,
+                                 x9,
+                                 x10,
+                                 x11)) f = Tuple11 (case f x1 of
+                                                        Tuple11 (y,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _) -> y,
+                                                    case f x2 of
+                                                        Tuple11 (_,
+                                                                 y,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _) -> y,
+                                                    case f x3 of
+                                                        Tuple11 (_,
+                                                                 _,
+                                                                 y,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _) -> y,
+                                                    case f x4 of
+                                                        Tuple11 (_,
+                                                                 _,
+                                                                 _,
+                                                                 y,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _) -> y,
+                                                    case f x5 of
+                                                        Tuple11 (_,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 y,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _) -> y,
+                                                    case f x6 of
+                                                        Tuple11 (_,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 y,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _) -> y,
+                                                    case f x7 of
+                                                        Tuple11 (_,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 y,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _) -> y,
+                                                    case f x8 of
+                                                        Tuple11 (_,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 y,
+                                                                 _,
+                                                                 _,
+                                                                 _) -> y,
+                                                    case f x9 of
+                                                        Tuple11 (_,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 y,
+                                                                 _,
+                                                                 _) -> y,
+                                                    case f x10 of
+                                                        Tuple11 (_,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 y,
+                                                                 _) -> y,
+                                                    case f x11 of
+                                                        Tuple11 (_,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 y) -> y)
+          {-# INLINABLE (>>=) #-}
+          (>>) = (*>)
+          {-# INLINE (>>) #-}
 instance Foldable Tuple11
     where foldr f z (Tuple11 (x1,
                                             x2,
@@ -886,6 +1257,179 @@ instance Applicative Tuple12
           {-# INLINE (<*) #-}
           (*>) _ y = y
           {-# INLINE (*>) #-}
+instance Monad Tuple12
+    where return = pure
+          {-# INLINE return #-}
+          (>>=) (Tuple12 (x1,
+                                 x2,
+                                 x3,
+                                 x4,
+                                 x5,
+                                 x6,
+                                 x7,
+                                 x8,
+                                 x9,
+                                 x10,
+                                 x11,
+                                 x12)) f = Tuple12 (case f x1 of
+                                                        Tuple12 (y,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _) -> y,
+                                                    case f x2 of
+                                                        Tuple12 (_,
+                                                                 y,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _) -> y,
+                                                    case f x3 of
+                                                        Tuple12 (_,
+                                                                 _,
+                                                                 y,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _) -> y,
+                                                    case f x4 of
+                                                        Tuple12 (_,
+                                                                 _,
+                                                                 _,
+                                                                 y,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _) -> y,
+                                                    case f x5 of
+                                                        Tuple12 (_,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 y,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _) -> y,
+                                                    case f x6 of
+                                                        Tuple12 (_,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 y,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _) -> y,
+                                                    case f x7 of
+                                                        Tuple12 (_,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 y,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _) -> y,
+                                                    case f x8 of
+                                                        Tuple12 (_,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 y,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _) -> y,
+                                                    case f x9 of
+                                                        Tuple12 (_,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 y,
+                                                                 _,
+                                                                 _,
+                                                                 _) -> y,
+                                                    case f x10 of
+                                                        Tuple12 (_,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 y,
+                                                                 _,
+                                                                 _) -> y,
+                                                    case f x11 of
+                                                        Tuple12 (_,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 y,
+                                                                 _) -> y,
+                                                    case f x12 of
+                                                        Tuple12 (_,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 y) -> y)
+          {-# INLINABLE (>>=) #-}
+          (>>) = (*>)
+          {-# INLINE (>>) #-}
 instance Foldable Tuple12
     where foldr f z (Tuple12 (x1,
                                             x2,
@@ -1028,6 +1572,206 @@ instance Applicative Tuple13
           {-# INLINE (<*) #-}
           (*>) _ y = y
           {-# INLINE (*>) #-}
+instance Monad Tuple13
+    where return = pure
+          {-# INLINE return #-}
+          (>>=) (Tuple13 (x1,
+                                 x2,
+                                 x3,
+                                 x4,
+                                 x5,
+                                 x6,
+                                 x7,
+                                 x8,
+                                 x9,
+                                 x10,
+                                 x11,
+                                 x12,
+                                 x13)) f = Tuple13 (case f x1 of
+                                                        Tuple13 (y,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _) -> y,
+                                                    case f x2 of
+                                                        Tuple13 (_,
+                                                                 y,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _) -> y,
+                                                    case f x3 of
+                                                        Tuple13 (_,
+                                                                 _,
+                                                                 y,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _) -> y,
+                                                    case f x4 of
+                                                        Tuple13 (_,
+                                                                 _,
+                                                                 _,
+                                                                 y,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _) -> y,
+                                                    case f x5 of
+                                                        Tuple13 (_,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 y,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _) -> y,
+                                                    case f x6 of
+                                                        Tuple13 (_,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 y,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _) -> y,
+                                                    case f x7 of
+                                                        Tuple13 (_,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 y,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _) -> y,
+                                                    case f x8 of
+                                                        Tuple13 (_,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 y,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _) -> y,
+                                                    case f x9 of
+                                                        Tuple13 (_,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 y,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _) -> y,
+                                                    case f x10 of
+                                                        Tuple13 (_,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 y,
+                                                                 _,
+                                                                 _,
+                                                                 _) -> y,
+                                                    case f x11 of
+                                                        Tuple13 (_,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 y,
+                                                                 _,
+                                                                 _) -> y,
+                                                    case f x12 of
+                                                        Tuple13 (_,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 y,
+                                                                 _) -> y,
+                                                    case f x13 of
+                                                        Tuple13 (_,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 y) -> y)
+          {-# INLINABLE (>>=) #-}
+          (>>) = (*>)
+          {-# INLINE (>>) #-}
 instance Foldable Tuple13
     where foldr f z (Tuple13 (x1,
                                             x2,
@@ -1193,6 +1937,235 @@ instance Applicative Tuple14
           {-# INLINE (<*) #-}
           (*>) _ y = y
           {-# INLINE (*>) #-}
+instance Monad Tuple14
+    where return = pure
+          {-# INLINE return #-}
+          (>>=) (Tuple14 (x1,
+                                 x2,
+                                 x3,
+                                 x4,
+                                 x5,
+                                 x6,
+                                 x7,
+                                 x8,
+                                 x9,
+                                 x10,
+                                 x11,
+                                 x12,
+                                 x13,
+                                 x14)) f = Tuple14 (case f x1 of
+                                                        Tuple14 (y,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _) -> y,
+                                                    case f x2 of
+                                                        Tuple14 (_,
+                                                                 y,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _) -> y,
+                                                    case f x3 of
+                                                        Tuple14 (_,
+                                                                 _,
+                                                                 y,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _) -> y,
+                                                    case f x4 of
+                                                        Tuple14 (_,
+                                                                 _,
+                                                                 _,
+                                                                 y,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _) -> y,
+                                                    case f x5 of
+                                                        Tuple14 (_,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 y,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _) -> y,
+                                                    case f x6 of
+                                                        Tuple14 (_,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 y,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _) -> y,
+                                                    case f x7 of
+                                                        Tuple14 (_,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 y,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _) -> y,
+                                                    case f x8 of
+                                                        Tuple14 (_,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 y,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _) -> y,
+                                                    case f x9 of
+                                                        Tuple14 (_,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 y,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _) -> y,
+                                                    case f x10 of
+                                                        Tuple14 (_,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 y,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _) -> y,
+                                                    case f x11 of
+                                                        Tuple14 (_,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 y,
+                                                                 _,
+                                                                 _,
+                                                                 _) -> y,
+                                                    case f x12 of
+                                                        Tuple14 (_,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 y,
+                                                                 _,
+                                                                 _) -> y,
+                                                    case f x13 of
+                                                        Tuple14 (_,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 y,
+                                                                 _) -> y,
+                                                    case f x14 of
+                                                        Tuple14 (_,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 y) -> y)
+          {-# INLINABLE (>>=) #-}
+          (>>) = (*>)
+          {-# INLINE (>>) #-}
 instance Foldable Tuple14
     where foldr f z (Tuple14 (x1,
                                             x2,
@@ -1369,6 +2342,266 @@ instance Applicative Tuple15
           {-# INLINE (<*) #-}
           (*>) _ y = y
           {-# INLINE (*>) #-}
+instance Monad Tuple15
+    where return = pure
+          {-# INLINE return #-}
+          (>>=) (Tuple15 (x1,
+                                 x2,
+                                 x3,
+                                 x4,
+                                 x5,
+                                 x6,
+                                 x7,
+                                 x8,
+                                 x9,
+                                 x10,
+                                 x11,
+                                 x12,
+                                 x13,
+                                 x14,
+                                 x15)) f = Tuple15 (case f x1 of
+                                                        Tuple15 (y,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _) -> y,
+                                                    case f x2 of
+                                                        Tuple15 (_,
+                                                                 y,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _) -> y,
+                                                    case f x3 of
+                                                        Tuple15 (_,
+                                                                 _,
+                                                                 y,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _) -> y,
+                                                    case f x4 of
+                                                        Tuple15 (_,
+                                                                 _,
+                                                                 _,
+                                                                 y,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _) -> y,
+                                                    case f x5 of
+                                                        Tuple15 (_,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 y,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _) -> y,
+                                                    case f x6 of
+                                                        Tuple15 (_,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 y,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _) -> y,
+                                                    case f x7 of
+                                                        Tuple15 (_,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 y,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _) -> y,
+                                                    case f x8 of
+                                                        Tuple15 (_,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 y,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _) -> y,
+                                                    case f x9 of
+                                                        Tuple15 (_,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 y,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _) -> y,
+                                                    case f x10 of
+                                                        Tuple15 (_,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 y,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _) -> y,
+                                                    case f x11 of
+                                                        Tuple15 (_,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 y,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _) -> y,
+                                                    case f x12 of
+                                                        Tuple15 (_,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 y,
+                                                                 _,
+                                                                 _,
+                                                                 _) -> y,
+                                                    case f x13 of
+                                                        Tuple15 (_,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 y,
+                                                                 _,
+                                                                 _) -> y,
+                                                    case f x14 of
+                                                        Tuple15 (_,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 y,
+                                                                 _) -> y,
+                                                    case f x15 of
+                                                        Tuple15 (_,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 _,
+                                                                 y) -> y)
+          {-# INLINABLE (>>=) #-}
+          (>>) = (*>)
+          {-# INLINE (>>) #-}
 instance Foldable Tuple15
     where foldr f z (Tuple15 (x1,
                                             x2,
