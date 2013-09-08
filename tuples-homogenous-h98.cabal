@@ -13,10 +13,10 @@ name:                tuples-homogenous-h98
 version:             0.1.0.0
 
 -- A short (one-line) description of the package.
-synopsis:            Haskell 98 wrappers for n-ary homogenous tuples providing Traversable and Applicative instances.
+synopsis:            Wrappers for n-ary tuples with Traversable and Applicative instances.
 
 -- A longer description of the package.
-description:         Provides wrappers for n-ary homogenous tuples of types @(a,...,a)@ and instances for zipping and traversing them. The package is Haskell98 compliant.
+description:         Provides @newtype@ wrappers for n-ary homogenous tuples of types @(a,...,a)@ and instances for @Functor@, @Applicative@ (zipping), @Foldable@ and @Traversable@. The package aims to be Haskell98 compliant.
 
 -- URL for the project homepage or repository.
 homepage:            https://github.com/ppetr/tuples-homogenous-h98
@@ -28,11 +28,13 @@ license:             BSD3
 license-file:        LICENSE
 
 -- The package author(s).
-author:              Petr Pudlak
+author:              Petr Pudlák
 
 -- An email address to which users can send suggestions, bug reports, and 
 -- patches.
-maintainer:          petr.mvd@gmail.com
+maintainer:          Petr Pudlák
+
+bug-reports:         https://github.com/ppetr/tuples-homogenous-h98/issues
 
 -- A copyright notice.
 -- copyright:           
@@ -53,5 +55,5 @@ library
   -- other-modules:       
   
   -- Other library packages from which modules are imported.
-  build-depends:       base >=4.0
+  build-depends:       base >= 4 && < 5
   
